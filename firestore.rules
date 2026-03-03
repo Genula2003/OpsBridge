@@ -1,0 +1,163 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // --- UTILITY FUNCTIONS ---
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+    function getRole() {
+      return getUserData().role;
+    }
+    function isAdmin() {
+      return getRole() == 'admin';
+    }
+    function isTL() {
+      return getRole() == 'tl';
+    }
+    function isMentor() {
+      return getRole() == 'mentor';
+    }
+    function isPrivileged() {
+      return isMentor() || isTL() || isAdmin();
+    }
+    function hasOnlyAllowedFields(allowedFields) {
+      return request.resource.data.keys().hasOnly(allowedFields);
+    }
+
+    // --- 1. users ---
+    match /users/{userId} {
+      // Users can read all users
+      allow read: if isAuthenticated();
+      // Only "admin" can change role field. Prevent role escalation by non-admin.
+      allow create: if isOwner(userId)
+                    && request.resource.data.role == 'user'; // Default role
+      allow update: if (isOwner(userId) && request.resource.data.role == resource.data.role)
+                    || isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // --- 2. scripts ---
+    match /scripts/{scriptId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated()
+                    && request.resource.data.authorId == request.auth.uid
+                    && (!request.resource.data.keys().hasAny(['approved', 'approvedBy'])
+                        || (request.resource.data.approved == false && request.resource.data.approvedBy == null));
+      allow update: if (isAuthenticated() && request.resource.data.authorId == resource.data.authorId && request.auth.uid == resource.data.authorId
+                        && request.resource.data.approved == resource.data.approved
+                        && request.resource.data.approvedBy == resource.data.approvedBy)
+                    || (isPrivileged());
+      allow delete: if isAuthenticated() && request.auth.uid == resource.data.authorId;
+    }
+
+    // --- 3. scriptVotes ---
+    match /scriptVotes/{voteId} {
+      allow read: if isAuthenticated();
+      // Ensure the voteId is predictable to prevent duplicates: scriptId_userId
+      allow create: if isAuthenticated()
+                    && request.resource.data.userId == request.auth.uid
+                    && voteId == request.resource.data.scriptId + '_' + request.auth.uid;
+      allow update, delete: if false; // No vote changing/deleting for MVP? Let's keep it simple.
+    }
+
+    // --- 4. stories ---
+    match /stories/{storyId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated()
+                    && request.resource.data.authorId == request.auth.uid
+                    && (!request.resource.data.keys().hasAny(['pinned']) || request.resource.data.pinned == false);
+      allow update: if (isAuthenticated() && request.auth.uid == resource.data.authorId
+                        && request.resource.data.pinned == resource.data.pinned)
+                    || (isTL() || isAdmin());
+      allow delete: if isAuthenticated() && request.auth.uid == resource.data.authorId;
+    }
+
+    // --- 5. threads ---
+    match /threads/{threadId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated()
+                    && request.resource.data.authorId == request.auth.uid
+                    && (!request.resource.data.keys().hasAny(['locked']) || request.resource.data.locked == false);
+      allow update: if (isAuthenticated() && request.auth.uid == resource.data.authorId
+                        && request.resource.data.locked == resource.data.locked)
+                    || (isTL() || isAdmin());
+      allow delete: if isAuthenticated() && request.auth.uid == resource.data.authorId;
+    }
+
+    // --- 6. threadComments ---
+    match /threadComments/{commentId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated()
+                    && request.resource.data.authorId == request.auth.uid
+                    && get(/databases/$(database)/documents/threads/$(request.resource.data.threadId)).data.locked == false;
+      allow update, delete: if isAuthenticated() && request.auth.uid == resource.data.authorId;
+    }
+
+    // --- 7. events ---
+    match /events/{eventId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && request.resource.data.createdBy == request.auth.uid;
+      allow update, delete: if isAuthenticated() && request.auth.uid == resource.data.createdBy;
+    }
+
+    // --- 8. eventRsvps ---
+    match /eventRsvps/{rsvpId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated()
+                    && request.resource.data.userId == request.auth.uid
+                    && rsvpId == request.resource.data.eventId + '_' + request.auth.uid;
+      allow update: if isAuthenticated() && request.auth.uid == resource.data.userId;
+      allow delete: if isAuthenticated() && request.auth.uid == resource.data.userId;
+    }
+
+    // --- 9. recognitions ---
+    match /recognitions/{recId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && request.resource.data.fromUserId == request.auth.uid;
+      allow update, delete: if false; // No edits after creation
+    }
+
+    // --- 10. breakRequests ---
+    match /breakRequests/{breakId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated()
+                    && request.resource.data.userId == request.auth.uid
+                    && request.resource.data.status == 'active'
+                    // IMPORTANT: To fully prevent multiple active breaks securely in rules without complex aggregation,
+                    // we ideally use predictable IDs like `active_break_$(userId)`. But since we want to keep a history,
+                    // we'll rely on a query limit in the client and a rule checking for existing active breaks.
+                    // This is hard to do purely in rules without a secondary index doc. We will enforce that the document ID
+                    // cannot overlap, or we trust the client + check.
+                    // Actually, let's use a specific structure: breakRequest IDs are random, but we check if a document exists
+                    // in a subcollection or we just rely on client.
+                    // A better way: Check if any active break request exists. Firestore rules can't query collections directly like that easily without known IDs.
+                    // Alternative: Enforce that the breakId is the userId for the *active* break, and it gets moved. Or we just allow it.
+                    // For now, allow create if user == auth.uid. We'll add a check if we can.
+                    ;
+      // Update logic
+      allow update: if isAuthenticated()
+                    && request.auth.uid == resource.data.userId
+                    && request.resource.data.status == 'ended'; // Allow status change to ended
+      allow delete: if false; // Deny delete
+    }
+
+    // --- 11. resources ---
+    match /resources/{resourceId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin(); // Assuming only admins manage resources
+    }
+
+    // --- 12. digestSnapshots ---
+    match /digestSnapshots/{digestId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+  }
+}
