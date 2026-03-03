@@ -1,0 +1,75 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-border: var(--border);
+  --color-ring: var(--ring);
+
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+:root {
+  /* Cool neutral white background, not pure white */
+  --background: #fafafc;
+  --foreground: #0f172a;
+  /* Cards remain true white for contrast */
+  --card: rgba(255, 255, 255, 0.8);
+  --card-foreground: #0f172a;
+  /* Indigo/Violet tone accent */
+  --primary: #6366f1;
+  --primary-foreground: #ffffff;
+  --secondary: #f1f5f9;
+  --secondary-foreground: #0f172a;
+  --muted: #f8fafc;
+  --muted-foreground: #64748b;
+  --accent: #f1f5f9;
+  --accent-foreground: #0f172a;
+  --border: #e2e8f0;
+  --ring: #6366f1;
+}
+
+.dark {
+  /* Maintain modern startup feel, base dark background */
+  --background: #020617;
+  --foreground: #f8fafc;
+  /* Glassy card background */
+  --card: rgba(15, 23, 42, 0.5);
+  --card-foreground: #f8fafc;
+  /* Indigo/Violet tone accent */
+  --primary: #818cf8;
+  --primary-foreground: #ffffff;
+  --secondary: #1e293b;
+  --secondary-foreground: #f8fafc;
+  --muted: #0f172a;
+  --muted-foreground: #94a3b8;
+  --accent: #1e293b;
+  --accent-foreground: #f8fafc;
+  --border: #1e293b;
+  --ring: #818cf8;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+}
+
+.glass {
+  background: var(--card);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--border);
+}

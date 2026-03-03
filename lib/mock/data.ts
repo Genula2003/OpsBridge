@@ -1,0 +1,60 @@
+import { Script, Story, Thread, Event, Recognition, BreakRequest, User, Resource } from "@/types";
+
+export const users: User[] = [
+  { id: "u1", name: "Alice Johnson", role: "admin", title: "Operations Manager", department: "Operations" },
+  { id: "u2", name: "Bob Smith", role: "tl", title: "Team Lead", department: "Customer Support" },
+  { id: "u3", name: "Charlie Davis", role: "mentor", title: "Senior Specialist", department: "Technical Support" },
+  { id: "u4", name: "Diana Prince", role: "user", title: "Support Agent", department: "Customer Support" },
+  { id: "u5", name: "Evan Wright", role: "user", title: "Support Agent", department: "Customer Support" },
+];
+
+export const scripts: Script[] = [
+  { id: "sc1", title: "Greeting - Escalation", content: "Hello, I understand your frustration. I am escalating this to our specialized team immediately.", category: "De-escalation", authorId: "u2", createdAt: "2023-10-01T10:00:00Z", upvotes: 42, isApproved: true },
+  { id: "sc2", title: "Closing - General", content: "Thank you for reaching out. Is there anything else I can assist you with today?", category: "Closing", authorId: "u3", createdAt: "2023-10-02T11:30:00Z", upvotes: 89, isApproved: true },
+  { id: "sc3", title: "Refund Policy Explanation", content: "Our refund policy allows for returns within 30 days of purchase, provided the item is in its original condition.", category: "Policy", authorId: "u4", createdAt: "2023-10-05T09:15:00Z", upvotes: 12, isApproved: false },
+  { id: "sc4", title: "Apology for Delay", content: "I apologize for the wait. We are currently experiencing higher than normal volume.", category: "Apology", authorId: "u2", createdAt: "2023-10-10T14:45:00Z", upvotes: 35, isApproved: true },
+];
+
+export const stories: Story[] = [
+  { id: "st1", title: "Saved a high-value account", content: "A customer was about to cancel their enterprise plan, but after walking them through our new feature set, they decided to upgrade instead!", authorId: "u3", createdAt: "2023-10-12T16:20:00Z", category: "Win", likes: 24, comments: 5, isPinned: true },
+  { id: "st2", title: "Funny typo in chat", content: "I accidentally typed 'have a great die' instead of 'day' and the customer replied 'RIP'. We had a good laugh.", authorId: "u4", createdAt: "2023-10-14T09:10:00Z", category: "Humor", likes: 56, comments: 12, isPinned: false },
+  { id: "st3", title: "Tricky technical issue resolved", content: "Spent 2 hours diagnosing a weird caching issue. Turns out clearing their browser data did the trick. Always check the basics first.", authorId: "u5", createdAt: "2023-10-15T11:05:00Z", category: "Learning", likes: 18, comments: 2, isPinned: false },
+];
+
+export const threads: Thread[] = [
+  { id: "th1", title: "How to handle angry customers during an outage?", content: "Looking for tips on de-escalation when our services go down.", authorId: "u4", createdAt: "2023-10-10T08:00:00Z", replies: 15, views: 120, isLocked: false, isResolved: true, tags: ["outage", "de-escalation"] },
+  { id: "th2", title: "Feedback on the new CRM interface", content: "The new layout is a bit confusing. Anyone else finding it hard to locate customer history?", authorId: "u5", createdAt: "2023-10-16T13:30:00Z", replies: 8, views: 85, isLocked: false, isResolved: false, tags: ["feedback", "crm"] },
+  { id: "th3", title: "Upcoming policy changes Q&A", content: "Post your questions about next month's return policy changes here.", authorId: "u1", createdAt: "2023-10-17T09:00:00Z", replies: 22, views: 250, isLocked: true, isResolved: false, tags: ["policy", "announcement"] },
+];
+
+export const events: Event[] = [
+  { id: "ev1", title: "Quarterly All-Hands Meeting", description: "Join us for updates on company performance and future goals.", date: "2023-11-01T15:00:00Z", location: "Main Conference Room / Zoom", organizerId: "u1", attendees: 150, type: "meeting" },
+  { id: "ev2", title: "De-escalation Workshop", description: "Interactive session on handling difficult conversations.", date: "2023-11-05T10:00:00Z", location: "Training Room A", organizerId: "u2", attendees: 25, type: "training" },
+  { id: "ev3", title: "Virtual Trivia Night", description: "Grab a drink and join us for some fun trivia!", date: "2023-11-10T18:00:00Z", location: "Zoom", organizerId: "u3", attendees: 40, type: "social" },
+];
+
+export const recognitions: Recognition[] = [
+  { id: "rc1", fromId: "u2", toId: "u4", message: "Great job handling that escalated call today. You stayed perfectly calm.", category: "Excellence", createdAt: "2023-10-15T14:20:00Z", likes: 12 },
+  { id: "rc2", fromId: "u1", toId: "u3", message: "Thanks for staying late to help the new trainees get set up.", category: "Teamwork", createdAt: "2023-10-16T17:45:00Z", likes: 28 },
+  { id: "rc3", fromId: "u5", toId: "u2", message: "Appreciate your guidance on that tricky technical ticket.", category: "Mentorship", createdAt: "2023-10-18T09:10:00Z", likes: 8 },
+];
+
+export const breakRequests: BreakRequest[] = [
+  { id: "br1", userId: "u4", time: "14:00", duration: 15, status: "active", activity: "Coffee chat" },
+  { id: "br2", userId: "u5", time: "15:30", duration: 30, status: "matched", activity: "Walk outside", matchedWith: "u3" },
+  { id: "br3", userId: "u2", time: "11:00", duration: 15, status: "completed", activity: "Quick vent session", matchedWith: "u1" },
+];
+
+export const resources: Resource[] = [
+  { id: "rs1", title: "Product Knowledge Base", description: "Central repository for all product details and specs.", url: "https://kb.company.com", category: "Documentation", icon: "book" },
+  { id: "rs2", title: "HR Portal", description: "Access your benefits, paystubs, and time off requests.", url: "https://hr.company.com", category: "Internal Tools", icon: "users" },
+  { id: "rs3", title: "IT Helpdesk", description: "Submit a ticket for hardware or software issues.", url: "https://it.company.com", category: "Support", icon: "monitor" },
+];
+
+export const weeklyDigest = {
+  topScript: scripts[1],
+  newJoiners: [users[4]],
+  upcomingEvents: [events[0], events[1]],
+  mostAppreciated: users[2],
+  topThread: threads[0],
+};
