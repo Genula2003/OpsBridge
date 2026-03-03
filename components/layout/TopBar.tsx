@@ -1,235 +1,141 @@
 "use client";
 
-import { useTheme } from "next-themes";
-import { useRole, Role } from "@/lib/RoleProvider";
-import { Moon, Sun, Menu, Search, Command, LayoutDashboard, BookOpen, MessageSquare, Users, Calendar, Coffee, Award, UserPlus, Folder, FileText, Settings, X } from "lucide-react";
 import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
+import { Search, Bell, Settings, LogOut, ChevronDown } from "lucide-react";
+import { useAuth } from "@/components/providers/AuthProvider";
+import { auth } from "@/lib/firebase/config";
+import { motion, AnimatePresence } from "framer-motion";
 
-export function TopBar({ onMenuClick }: { onMenuClick: () => void }) {
-  const { theme, setTheme } = useTheme();
-  const { role, setRole } = useRole();
+export default function TopBar() {
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
   const router = useRouter();
-  const [mounted, setMounted] = useState(false);
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [activeModal, setActiveModal] = useState<string | null>(null);
+  const { profile } = useAuth();
 
   useEffect(() => {
-    // defer to next tick
-    const timeout = setTimeout(() => setMounted(true), 0);
-    return () => clearTimeout(timeout);
-  }, []);
-
-  useEffect(() => {
-    const down = (e: KeyboardEvent) => {
-      if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
         e.preventDefault();
-        setIsSearchOpen((open) => !open);
+        setSearchOpen((prev) => !prev);
       }
+      if (e.key === "Escape") setSearchOpen(false);
     };
-
-    document.addEventListener("keydown", down);
-    return () => document.removeEventListener("keydown", down);
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
-  if (!mounted) return null;
+  const handleLogout = async () => {
+    await auth.signOut();
+    router.push("/login");
+  };
 
   return (
-    <>
-      <header className="sticky top-0 z-30 flex h-16 shrink-0 items-center justify-between border-b border-border bg-background/80 px-4 backdrop-blur-md sm:px-6 lg:px-8">
-        <div className="flex flex-1 items-center gap-4 lg:gap-8">
+    <header className="h-20 bg-[#0B0B10]/80 backdrop-blur-xl border-b border-white/5 flex items-center justify-between px-8 sticky top-0 z-30 shadow-[0_4px_30px_rgba(0,0,0,0.1)]">
+      {/* Search Bar (Kokonut Style) */}
+      <button
+        onClick={() => setSearchOpen(true)}
+        className="flex items-center gap-3 px-4 py-2.5 rounded-xl bg-[#111118] border border-white/10 hover:border-[#7C5CFF]/30 text-zinc-500 hover:text-white transition-all duration-300 w-64 md:w-96 shadow-[0_0_15px_rgba(0,0,0,0.2)] group"
+      >
+        <Search className="w-4 h-4 group-hover:text-[#7C5CFF] transition-colors" />
+        <span className="text-sm font-medium tracking-wide">Search operations...</span>
+        <kbd className="ml-auto flex items-center gap-1 px-2 py-0.5 rounded-lg bg-white/5 border border-white/10 text-[10px] font-mono text-zinc-500 shadow-inner group-hover:border-[#7C5CFF]/20 group-hover:text-[#7C5CFF]">
+          <span className="text-xs">⌘</span>K
+        </kbd>
+      </button>
+
+      {/* Right Actions */}
+      <div className="flex items-center gap-6">
+        <button className="relative p-2 text-zinc-500 hover:text-white transition-colors group">
+          <Bell className="w-5 h-5 group-hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]" />
+          <span className="absolute top-1 right-1 w-2 h-2 bg-[#7C5CFF] rounded-full shadow-[0_0_10px_#7C5CFF] ring-2 ring-[#0B0B10]" />
+        </button>
+
+        <div className="relative">
           <button
-            onClick={onMenuClick}
-            className="lg:hidden p-2 -ml-2 text-muted-foreground hover:bg-muted rounded-md transition-colors"
+            onClick={() => setProfileOpen(!profileOpen)}
+            className="flex items-center gap-3 pl-4 pr-2 py-1.5 rounded-full border border-white/10 hover:border-[#7C5CFF]/30 hover:bg-white/5 transition-all duration-300"
           >
-            <Menu className="h-5 w-5" />
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#7C5CFF] to-[#4B30B0] flex items-center justify-center text-white font-bold text-sm shadow-[0_0_15px_rgba(124,92,255,0.4)] ring-2 ring-[#0B0B10]">
+              {profile?.name?.charAt(0) || "A"}
+            </div>
+            <span className="text-sm font-semibold tracking-wide hidden md:block">{profile?.name || "Agent"}</span>
+            <ChevronDown className="w-4 h-4 text-zinc-500 hidden md:block" />
           </button>
 
-          {/* Action Search Bar Placeholder */}
-          <button
-            onClick={() => setIsSearchOpen(true)}
-            className="group flex max-w-sm flex-1 items-center gap-2 rounded-full border border-border bg-muted/50 px-4 py-2 text-sm text-muted-foreground transition-all hover:bg-muted focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
-          >
-            <Search className="h-4 w-4" />
-            <span className="flex-1 text-left">Search anything...</span>
-            <kbd className="hidden sm:inline-flex items-center gap-1 rounded border border-border bg-background px-1.5 font-mono text-[10px] font-medium opacity-100">
-              <span className="text-xs">⌘</span>K
-            </kbd>
-          </button>
+          <AnimatePresence>
+            {profileOpen && (
+              <motion.div
+                initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+                className="absolute right-0 mt-3 w-56 bg-[#111118] border border-white/10 rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.5)] overflow-hidden z-50 py-2"
+              >
+                <div className="px-4 py-3 border-b border-white/5 mb-2">
+                  <p className="text-sm font-bold text-white">{profile?.name || "Agent"}</p>
+                  <p className="text-xs text-zinc-500 uppercase tracking-widest mt-1">Role: <span className="text-[#7C5CFF] font-semibold">{profile?.role || "user"}</span></p>
+                </div>
+                <button className="w-full text-left px-4 py-2.5 text-sm text-zinc-400 hover:text-white hover:bg-white/5 flex items-center gap-3 transition-colors">
+                  <Settings className="w-4 h-4" /> Preferences
+                </button>
+                <button
+                  onClick={handleLogout}
+                  className="w-full text-left px-4 py-2.5 text-sm text-red-400 hover:text-red-300 hover:bg-red-500/10 flex items-center gap-3 transition-colors"
+                >
+                  <LogOut className="w-4 h-4" /> Secure Disconnect
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
+      </div>
 
-        <div className="flex items-center gap-4">
-          <div className="hidden sm:flex items-center gap-2 border-r border-border pr-4">
-            <span className="text-xs font-medium text-muted-foreground">Dev Role:</span>
-            <select
-              value={role}
-              onChange={(e) => setRole(e.target.value as Role)}
-              className="rounded-md border-border bg-background px-2 py-1 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-primary"
-            >
-              <option value="user">User</option>
-              <option value="mentor">Mentor</option>
-              <option value="tl">Team Lead</option>
-              <option value="admin">Admin</option>
-            </select>
-          </div>
-
-          <button
-            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            className="rounded-full p-2 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-          >
-            {theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
-          </button>
-
-          <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-sm">
-            OB
-          </div>
-        </div>
-      </header>
-
-      {/* Mock Command Palette Overlay */}
+      {/* Command Palette Modal (Simplified for UI Shell) */}
       <AnimatePresence>
-        {isSearchOpen && (
-          <div className="fixed inset-0 z-50 flex items-start justify-center pt-20 bg-black/50 backdrop-blur-sm p-4 sm:p-0">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setIsSearchOpen(false)}
-              className="absolute inset-0"
-            />
+        {searchOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-[#0B0B10]/80 backdrop-blur-md z-50 flex items-start justify-center pt-[15vh]"
+            onClick={() => setSearchOpen(false)}
+          >
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: -20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: -20 }}
-              transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              className="relative w-full max-w-xl overflow-hidden rounded-xl bg-card border border-border shadow-2xl"
+              transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+              className="bg-[#111118] w-full max-w-2xl rounded-2xl shadow-[0_0_50px_rgba(124,92,255,0.15)] border border-[#7C5CFF]/20 overflow-hidden"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="flex items-center gap-3 border-b border-border p-4">
-                <Search className="h-5 w-5 text-muted-foreground" />
+              <div className="flex items-center px-6 py-4 border-b border-white/5">
+                <Search className="w-5 h-5 text-[#7C5CFF]" />
                 <input
                   type="text"
-                  placeholder="Type a command or search..."
-                  className="flex-1 bg-transparent outline-none placeholder:text-muted-foreground"
+                  placeholder="Execute command or search..."
+                  className="flex-1 bg-transparent border-none outline-none text-lg text-white placeholder-zinc-500 px-4 py-2 font-medium tracking-wide"
                   autoFocus
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
                 />
-                <button onClick={() => setIsSearchOpen(false)} className="rounded p-1 text-xs border border-border bg-muted hover:bg-background transition-colors">
+                <kbd className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-white/5 border border-white/10 text-xs font-mono text-zinc-500">
                   ESC
-                </button>
+                </kbd>
               </div>
-              <div className="max-h-[60vh] overflow-y-auto p-2">
-                {(!searchQuery || "add script".includes(searchQuery.toLowerCase()) || "post shift story".includes(searchQuery.toLowerCase()) || "create event".includes(searchQuery.toLowerCase()) || "send shoutout".includes(searchQuery.toLowerCase()) || "start break match".includes(searchQuery.toLowerCase())) && (
-                  <>
-                    <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground mt-2">Actions</div>
-                    <button onClick={() => { setIsSearchOpen(false); setActiveModal('add_script'); }} className="flex w-full items-center gap-3 rounded-lg px-2 py-3 text-sm hover:bg-muted hover:text-foreground text-left transition-colors">
-                      <Command className="h-4 w-4" /> Add Script
-                    </button>
-                    <button onClick={() => { setIsSearchOpen(false); setActiveModal('post_story'); }} className="flex w-full items-center gap-3 rounded-lg px-2 py-3 text-sm hover:bg-muted hover:text-foreground text-left transition-colors">
-                      <Command className="h-4 w-4" /> Post Shift Story
-                    </button>
-                    <button onClick={() => { setIsSearchOpen(false); setActiveModal('create_event'); }} className="flex w-full items-center gap-3 rounded-lg px-2 py-3 text-sm hover:bg-muted hover:text-foreground text-left transition-colors">
-                      <Calendar className="h-4 w-4" /> Create Event
-                    </button>
-                    <button onClick={() => { setIsSearchOpen(false); setActiveModal('send_shoutout'); }} className="flex w-full items-center gap-3 rounded-lg px-2 py-3 text-sm hover:bg-muted hover:text-foreground text-left transition-colors">
-                      <Award className="h-4 w-4" /> Send Shoutout
-                    </button>
-                    <button onClick={() => { setIsSearchOpen(false); setActiveModal('start_break_match'); }} className="flex w-full items-center gap-3 rounded-lg px-2 py-3 text-sm hover:bg-muted hover:text-foreground text-left transition-colors">
-                      <Coffee className="h-4 w-4" /> Start Break Match
-                    </button>
-                  </>
-                )}
-
-                {(!searchQuery || "dashboard verbiage hub shift stories culture threads events break buddy recognition new joiners resources weekly digest admin".includes(searchQuery.toLowerCase())) && (
-                  <>
-                    <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground mt-4">Navigation</div>
-                    {[
-                      { name: 'Dashboard', path: '/', icon: LayoutDashboard },
-                      { name: 'Verbiage Hub', path: '/verbiage-hub', icon: BookOpen },
-                      { name: 'Shift Stories', path: '/shift-stories', icon: MessageSquare },
-                      { name: 'Culture Threads', path: '/culture-threads', icon: Users },
-                      { name: 'Events', path: '/events', icon: Calendar },
-                      { name: 'Break Buddy', path: '/break-buddy', icon: Coffee },
-                      { name: 'Recognition', path: '/recognition', icon: Award },
-                      { name: 'New Joiners', path: '/new-joiners', icon: UserPlus },
-                      { name: 'Resources', path: '/resources', icon: Folder },
-                      { name: 'Weekly Digest', path: '/weekly-digest', icon: FileText },
-                      { name: 'Admin', path: '/admin', icon: Settings },
-                    ].filter(route => !searchQuery || route.name.toLowerCase().includes(searchQuery.toLowerCase())).map(route => {
-                      // Hide Admin from non-admin roles in search results
-                      if (route.name === 'Admin' && role !== 'admin') return null;
-                      return (
-                        <button key={route.path} onClick={() => { setIsSearchOpen(false); router.push(route.path); }} className="flex w-full items-center gap-3 rounded-lg px-2 py-3 text-sm hover:bg-muted hover:text-foreground text-left transition-colors">
-                          <route.icon className="h-4 w-4" /> {route.name}
-                        </button>
-                      );
-                    })}
-                  </>
-                )}
+              <div className="max-h-96 overflow-y-auto p-4 py-6 space-y-4">
+                <div className="text-xs font-semibold text-zinc-500 uppercase tracking-widest px-4 mb-2">Suggested Actions</div>
+                {['Navigate to Verbiage Hub', 'Create New Shift Story', 'Recognize Teammate', 'View Upcoming Events'].map((action, i) => (
+                  <div key={i} className="px-4 py-3 rounded-xl hover:bg-white/5 flex items-center gap-3 cursor-pointer group transition-all duration-300">
+                    <div className="w-8 h-8 rounded-lg bg-[#7C5CFF]/10 flex items-center justify-center group-hover:bg-[#7C5CFF]/20 transition-colors">
+                      <Search className="w-4 h-4 text-[#7C5CFF]" />
+                    </div>
+                    <span className="text-sm font-medium text-zinc-300 group-hover:text-white tracking-wide">{action}</span>
+                  </div>
+                ))}
               </div>
             </motion.div>
-          </div>
+          </motion.div>
         )}
       </AnimatePresence>
-
-      {/* Mock Action Modals */}
-      <AnimatePresence>
-        {activeModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setActiveModal(null)}
-              className="absolute inset-0"
-            />
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              className="relative w-full max-w-md overflow-hidden rounded-xl bg-card border border-border shadow-2xl p-6"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold text-foreground">
-                  {activeModal === 'add_script' && 'Add Verbiage Script'}
-                  {activeModal === 'post_story' && 'Post a Shift Story'}
-                  {activeModal === 'create_event' && 'Create Event'}
-                  {activeModal === 'send_shoutout' && 'Send Shoutout'}
-                  {activeModal === 'start_break_match' && 'Start Break Match'}
-                </h2>
-                <button onClick={() => setActiveModal(null)} className="p-1 rounded-md text-muted-foreground hover:bg-muted">
-                  <X className="h-5 w-5" />
-                </button>
-              </div>
-              <div className="space-y-4">
-                <p className="text-sm text-muted-foreground">
-                  This is a placeholder modal for the action. In a real application, a form would be presented here.
-                </p>
-                <div className="h-32 rounded-md bg-muted/50 border border-dashed border-border flex items-center justify-center">
-                  <span className="text-muted-foreground text-sm">Form goes here</span>
-                </div>
-                <div className="flex justify-end gap-2 mt-6">
-                  <button onClick={() => setActiveModal(null)} className="px-4 py-2 rounded-md text-sm font-medium hover:bg-muted transition-colors">
-                    Cancel
-                  </button>
-                  <button onClick={() => {
-                    // Simulate action success
-                    alert(`Action completed: ${activeModal}`);
-                    setActiveModal(null);
-                  }} className="px-4 py-2 rounded-md text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 transition-colors">
-                    Submit
-                  </button>
-                </div>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
-    </>
+    </header>
   );
 }

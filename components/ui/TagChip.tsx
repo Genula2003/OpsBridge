@@ -1,25 +1,37 @@
 import { cn } from "@/lib/utils";
+import { ReactNode } from "react";
 
-interface TagChipProps extends React.HTMLAttributes<HTMLSpanElement> {
-  label: string;
-  variant?: "default" | "success" | "warning" | "destructive" | "outline";
+export function TagChip({
+  children,
+  label,
+  className,
+  active = false,
+  variant = "default",
+  onClick,
+}: {
+  children?: ReactNode;
+  label?: string;
   className?: string;
-}
-
-export function TagChip({ label, variant = "default", className, ...props }: TagChipProps) {
-  const baseClasses = "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2";
-
-  const variants = {
-    default: "bg-primary text-primary-foreground hover:bg-primary/80",
-    success: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
-    warning: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400",
-    destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/80",
-    outline: "text-foreground border border-input hover:bg-accent hover:text-accent-foreground",
-  };
-
+  active?: boolean;
+  variant?: "default" | "success" | "warning" | "outline" | "destructive";
+  onClick?: () => void;
+}) {
   return (
-    <span className={cn(baseClasses, variants[variant], className)} {...props}>
-      {label}
+    <span
+      onClick={onClick}
+      className={cn(
+        "inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold tracking-wide luxury-transition",
+        onClick && "cursor-pointer",
+        active && "bg-[#7C5CFF]/20 text-[#7C5CFF] shadow-[0_0_15px_rgba(124,92,255,0.3)] border border-[#7C5CFF]/40",
+        !active && variant === "default" && "bg-white/5 text-zinc-400 hover:bg-white/10 hover:text-white border border-white/10",
+        !active && variant === "success" && "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20",
+        !active && variant === "outline" && "bg-transparent text-zinc-400 border border-white/10",
+        !active && variant === "warning" && "bg-amber-500/10 text-amber-400 border border-amber-500/20",
+        !active && variant === "destructive" && "bg-red-500/10 text-red-400 border border-red-500/20",
+        className
+      )}
+    >
+      {label || children}
     </span>
   );
 }

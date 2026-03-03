@@ -4,128 +4,146 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
-import { useRole } from "@/lib/RoleProvider";
 import {
   LayoutDashboard,
-  MessageSquare,
   BookOpen,
+  History,
+  MessageSquare,
   Calendar,
   Coffee,
   Award,
   Users,
   FolderOpen,
-  Mail,
-  Shield,
+  FileText,
+  ShieldAlert,
   Menu,
+  X
 } from "lucide-react";
-
-interface SidebarProps {
-  isMobileOpen: boolean;
-  setMobileOpen: (open: boolean) => void;
-  isCollapsed: boolean;
-  setCollapsed: (collapsed: boolean) => void;
-}
+import { useState } from "react";
+import { useAuth } from "@/components/providers/AuthProvider";
 
 const routes = [
-  { path: "/", label: "Dashboard", icon: LayoutDashboard },
-  { path: "/verbiage-hub", label: "Verbiage Hub", icon: BookOpen },
-  { path: "/shift-stories", label: "Shift Stories", icon: MessageSquare },
-  { path: "/culture-threads", label: "Culture Threads", icon: Users },
-  { path: "/events", label: "Events", icon: Calendar },
-  { path: "/break-buddy", label: "Break Buddy", icon: Coffee },
-  { path: "/recognition", label: "Recognition", icon: Award },
-  { path: "/new-joiners", label: "New Joiners", icon: Users },
-  { path: "/resources", label: "Resources", icon: FolderOpen },
-  { path: "/weekly-digest", label: "Weekly Digest", icon: Mail },
+  { name: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
+  { name: "Verbiage Hub", path: "/verbiage-hub", icon: BookOpen },
+  { name: "Shift Stories", path: "/shift-stories", icon: History },
+  { name: "Culture Threads", path: "/culture-threads", icon: MessageSquare },
+  { name: "Events", path: "/events", icon: Calendar },
+  { name: "Break Buddy", path: "/break-buddy", icon: Coffee },
+  { name: "Recognition", path: "/recognition", icon: Award },
+  { name: "New Joiners", path: "/new-joiners", icon: Users },
+  { name: "Resources", path: "/resources", icon: FolderOpen },
+  { name: "Weekly Digest", path: "/weekly-digest", icon: FileText },
 ];
 
-export function Sidebar({ isMobileOpen, setMobileOpen, isCollapsed, setCollapsed }: SidebarProps) {
+export default function Sidebar() {
   const pathname = usePathname();
-  const { role } = useRole();
+  const [collapsed, setCollapsed] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const { profile } = useAuth();
+  const isAdmin = profile?.role === "admin";
 
-  const allRoutes = [...routes];
-  if (role === "admin") {
-    allRoutes.push({ path: "/admin", label: "Admin", icon: Shield });
-  }
+  const allRoutes = isAdmin
+    ? [...routes, { name: "Admin", path: "/admin", icon: ShieldAlert }]
+    : routes;
+
+  const NavContent = () => (
+    <div className="flex flex-col h-full bg-[#0B0B10] border-r border-white/5 py-6">
+      <div className="flex items-center justify-between px-6 mb-10">
+        {!collapsed && (
+          <Link href="/dashboard" className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-[#7C5CFF] shadow-[0_0_20px_rgba(124,92,255,0.4)] flex items-center justify-center">
+              <span className="text-white font-bold text-lg leading-none mt-[-2px]">O</span>
+            </div>
+            <span className="font-bold text-white tracking-widest uppercase text-sm">OpsBridge</span>
+          </Link>
+        )}
+        <button
+          onClick={() => setCollapsed(!collapsed)}
+          className="p-2 rounded-xl text-zinc-500 hover:text-white hover:bg-white/5 transition-colors hidden md:block"
+        >
+          <Menu className="w-5 h-5" />
+        </button>
+      </div>
+
+      <nav className="flex-1 overflow-y-auto px-4 space-y-2 no-scrollbar">
+        {allRoutes.map((route) => {
+          const active = pathname === route.path;
+          return (
+            <Link key={route.path} href={route.path}>
+              <div
+                className={cn(
+                  "relative flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 group cursor-pointer",
+                  active
+                    ? "bg-[#7C5CFF]/10 text-white shadow-[inset_0_0_20px_rgba(124,92,255,0.05)]"
+                    : "text-zinc-500 hover:bg-white/5 hover:text-zinc-300"
+                )}
+              >
+                {active && (
+                  <motion.div
+                    layoutId="activeTab"
+                    className="absolute left-0 top-1/4 bottom-1/4 w-[3px] bg-[#7C5CFF] rounded-r-full shadow-[0_0_10px_#7C5CFF]"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                  />
+                )}
+                <route.icon
+                  className={cn(
+                    "w-5 h-5 transition-all duration-300",
+                    active ? "text-[#7C5CFF] drop-shadow-[0_0_8px_rgba(124,92,255,0.8)]" : "group-hover:text-[#7C5CFF]/70"
+                  )}
+                />
+                {!collapsed && (
+                  <span className={cn("text-sm font-medium tracking-wide", active ? "font-bold" : "")}>
+                    {route.name}
+                  </span>
+                )}
+              </div>
+            </Link>
+          );
+        })}
+      </nav>
+    </div>
+  );
 
   return (
     <>
-      {/* Mobile overlay */}
-      {isMobileOpen && (
-        <div
-          className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm lg:hidden"
-          onClick={() => setMobileOpen(false)}
-        />
-      )}
+      {/* Mobile Toggle */}
+      <button
+        className="md:hidden fixed bottom-6 right-6 z-50 p-4 bg-[#7C5CFF] text-white rounded-full shadow-[0_0_30px_rgba(124,92,255,0.4)]"
+        onClick={() => setMobileOpen(!mobileOpen)}
+      >
+        {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+      </button>
 
-      {/* Sidebar */}
+      {/* Desktop Sidebar */}
       <motion.aside
         initial={false}
-        animate={{
-          width: isCollapsed ? "5rem" : "16rem",
-        }}
-        className={cn(
-          "fixed inset-y-0 left-0 z-50 flex flex-col border-r border-border bg-card/50 backdrop-blur-xl transition-[transform,width] duration-300 ease-in-out lg:static lg:h-screen",
-          isMobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
-        )}
+        animate={{ width: collapsed ? 80 : 260 }}
+        transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+        className="hidden md:block h-screen z-40 relative shadow-[20px_0_40px_-20px_rgba(0,0,0,0.5)]"
       >
-        <div className="flex h-16 items-center px-4 gap-3 border-b border-white/5">
-          <Link href="/" className="flex items-center gap-2 font-bold text-xl tracking-tight text-primary transition-all">
-            <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-primary/10 text-primary">
-              <span className="text-sm font-black">OB</span>
-            </div>
-            {!isCollapsed && <span className="truncate">OpsBridge</span>}
-          </Link>
-          {!isCollapsed && (
-            <button
-              onClick={() => setCollapsed(!isCollapsed)}
-              className="ml-auto hidden lg:flex p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground rounded-md transition-colors"
-            >
-              <Menu className="h-4 w-4" />
-            </button>
-          )}
-          {isCollapsed && (
-            <button
-              onClick={() => setCollapsed(!isCollapsed)}
-              className="hidden lg:flex p-1.5 mx-auto text-muted-foreground hover:bg-muted hover:text-foreground rounded-md transition-colors"
-            >
-              <Menu className="h-4 w-4" />
-            </button>
-          )}
-        </div>
-
-        <nav className="flex-1 space-y-1.5 px-3 py-6 overflow-y-auto overflow-x-hidden">
-          {allRoutes.map((route) => {
-            const isActive = pathname === route.path;
-            const Icon = route.icon;
-
-            return (
-              <Link
-                key={route.path}
-                href={route.path}
-                onClick={() => setMobileOpen(false)}
-                className={cn(
-                  "group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all hover:bg-primary/5",
-                  isActive ? "text-primary font-semibold" : "text-muted-foreground hover:text-foreground",
-                  isCollapsed ? "justify-center" : "justify-start"
-                )}
-                title={isCollapsed ? route.label : undefined}
-              >
-                <Icon className={cn("h-5 w-5 shrink-0 transition-transform group-hover:scale-110", isActive && "text-primary")} />
-                {!isCollapsed && <span className="truncate">{route.label}</span>}
-
-                {isActive && (
-                  <motion.div
-                    layoutId="sidebar-active-pill"
-                    className="absolute inset-0 z-[-1] rounded-xl bg-primary/10 dark:bg-primary/15 border border-primary/20"
-                    transition={{ type: "spring", stiffness: 350, damping: 30 }}
-                  />
-                )}
-              </Link>
-            );
-          })}
-        </nav>
+        <NavContent />
       </motion.aside>
+
+      {/* Mobile Sidebar */}
+      <div
+        className={cn(
+          "fixed inset-0 bg-[#0B0B10]/80 backdrop-blur-sm z-40 md:hidden transition-opacity duration-300",
+          mobileOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+        )}
+        onClick={() => setMobileOpen(false)}
+      >
+        <motion.aside
+          initial={{ x: "-100%" }}
+          animate={{ x: mobileOpen ? 0 : "-100%" }}
+          transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+          className="w-64 h-full"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <NavContent />
+        </motion.aside>
+      </div>
     </>
   );
 }
