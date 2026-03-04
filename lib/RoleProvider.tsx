@@ -1,21 +1,22 @@
 "use client";
 
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext } from "react";
+import { useAuth } from "@/components/providers/AuthProvider";
 
 export type Role = "user" | "mentor" | "tl" | "admin";
 
 interface RoleContextType {
   role: Role;
-  setRole: (role: Role) => void;
 }
 
 const RoleContext = createContext<RoleContextType | undefined>(undefined);
 
 export function RoleProvider({ children }: { children: React.ReactNode }) {
-  const [role, setRole] = useState<Role>("user");
+  const { profile } = useAuth();
+  const role: Role = profile?.role || "user";
 
   return (
-    <RoleContext.Provider value={{ role, setRole }}>
+    <RoleContext.Provider value={{ role }}>
       {children}
     </RoleContext.Provider>
   );

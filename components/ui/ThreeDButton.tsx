@@ -11,6 +11,7 @@ interface ThreeDButtonProps {
   variant?: "primary" | "secondary" | "danger" | "ghost";
   size?: "sm" | "md" | "lg";
   disabled?: boolean;
+  type?: "button" | "submit" | "reset";
 }
 
 export function ThreeDButton({
@@ -20,6 +21,7 @@ export function ThreeDButton({
   variant = "primary",
   size = "md",
   disabled = false,
+  type = "button",
 }: ThreeDButtonProps) {
   const baseStyles = "relative inline-flex items-center justify-center rounded-xl px-6 py-3 font-semibold text-sm transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] overflow-hidden shadow-md";
 
@@ -39,6 +41,7 @@ export function ThreeDButton({
   return (
     <motion.button
       whileTap={{ scale: 0.98 }}
+      type={type}
       onClick={onClick}
       disabled={disabled}
       className={cn(

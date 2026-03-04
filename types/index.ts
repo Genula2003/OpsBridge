@@ -14,10 +14,27 @@ export interface Script {
   title: string;
   content: string;
   category: string;
-  authorId: string;
-  createdAt: string;
-  upvotes: number;
-  isApproved: boolean;
+  authorUid: string;
+  authorName: string;
+  createdAt: number;
+  updatedAt?: number;
+  upvoteCount: number;
+  approved: boolean;
+  approvedBy?: string;
+}
+
+export interface ScriptVote {
+  scriptId: string;
+  uid: string;
+  createdAt: number;
+}
+
+export interface Comment {
+  id: string;
+  uid: string;
+  authorName: string;
+  text: string;
+  createdAt: number;
 }
 
 export interface Story {
