@@ -3,7 +3,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { onAuthStateChanged, User as FirebaseUser } from "firebase/auth";
 import { auth } from "@/lib/firebase/config";
-import { getUserProfile, UserProfile } from "@/lib/firebase/auth";
+import { getUserProfile, createUserProfile, UserProfile } from "@/lib/firebase/auth";
 
 interface AuthContextType {
   user: FirebaseUser | null;
@@ -29,8 +29,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(firebaseUser);
 
       if (firebaseUser) {
-        const userProfile = await getUserProfile(firebaseUser.uid);
-        setProfile(userProfile);
+        try {
+          let userProfile = await getUserProfile(firebaseUser.uid);
+          if (!userProfile) {
+            userProfile = await createUserProfile(firebaseUser);
+          }
+          setProfile(userProfile);
+        } catch (e) {
+          console.error("Error fetching/creating user profile:", e);
+          setProfile(null);
+        }
       } else {
         setProfile(null);
       }

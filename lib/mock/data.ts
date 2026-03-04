@@ -9,10 +9,10 @@ export const users: User[] = [
 ];
 
 export const scripts: Script[] = [
-  { id: "sc1", title: "Greeting - Escalation", content: "Hello, I understand your frustration. I am escalating this to our specialized team immediately.", category: "De-escalation", authorId: "u2", createdAt: "2023-10-01T10:00:00Z", upvotes: 42, isApproved: true },
-  { id: "sc2", title: "Closing - General", content: "Thank you for reaching out. Is there anything else I can assist you with today?", category: "Closing", authorId: "u3", createdAt: "2023-10-02T11:30:00Z", upvotes: 89, isApproved: true },
-  { id: "sc3", title: "Refund Policy Explanation", content: "Our refund policy allows for returns within 30 days of purchase, provided the item is in its original condition.", category: "Policy", authorId: "u4", createdAt: "2023-10-05T09:15:00Z", upvotes: 12, isApproved: false },
-  { id: "sc4", title: "Apology for Delay", content: "I apologize for the wait. We are currently experiencing higher than normal volume.", category: "Apology", authorId: "u2", createdAt: "2023-10-10T14:45:00Z", upvotes: 35, isApproved: true },
+  { id: "sc1", title: "Greeting - Escalation", content: "Hello, I understand your frustration. I am escalating this to our specialized team immediately.", category: "De-escalation", authorUid: "u2", authorName: "Bob Smith", createdAt: Date.parse("2023-10-01T10:00:00Z"), upvoteCount: 42, approved: true },
+  { id: "sc2", title: "Closing - General", content: "Thank you for reaching out. Is there anything else I can assist you with today?", category: "Closing", authorUid: "u3", authorName: "Charlie Davis", createdAt: Date.parse("2023-10-02T11:30:00Z"), upvoteCount: 89, approved: true },
+  { id: "sc3", title: "Refund Policy Explanation", content: "Our refund policy allows for returns within 30 days of purchase, provided the item is in its original condition.", category: "Policy", authorUid: "u4", authorName: "Diana Prince", createdAt: Date.parse("2023-10-05T09:15:00Z"), upvoteCount: 12, approved: false },
+  { id: "sc4", title: "Apology for Delay", content: "I apologize for the wait. We are currently experiencing higher than normal volume.", category: "Apology", authorUid: "u2", authorName: "Bob Smith", createdAt: Date.parse("2023-10-10T14:45:00Z"), upvoteCount: 35, approved: true },
 ];
 
 export const stories: Story[] = [
