@@ -141,12 +141,10 @@ export default function WeeklyDigest() {
              <div className="flex-1 bg-muted/20 p-5 rounded-xl border border-border/50 hover:bg-muted/40 transition-colors flex flex-col">
               <h4 className="font-bold text-lg mb-3 line-clamp-2 leading-tight">{weeklyDigest.topThread.title}</h4>
               <p className="text-muted-foreground text-sm mb-4 line-clamp-3 leading-relaxed">
-                {weeklyDigest.topThread.content}
+                {weeklyDigest.topThread.body}
               </p>
               <div className="flex items-center gap-4 text-xs font-semibold text-muted-foreground mt-auto bg-background/50 p-2.5 rounded-lg border border-border/30 w-fit">
-                <span className="flex items-center gap-1.5"><MessageSquare className="w-4 h-4 text-blue-500/70" /> {weeklyDigest.topThread.replies} Replies</span>
-                <span className="w-1 h-1 rounded-full bg-border" />
-                <span className="flex items-center gap-1.5"><Users className="w-4 h-4 text-blue-500/70" /> {weeklyDigest.topThread.views} Views</span>
+                <span className="flex items-center gap-1.5"><MessageSquare className="w-4 h-4 text-blue-500/70" /> {weeklyDigest.topThread.upvoteCount} Upvotes</span>
               </div>
             </div>
              <Link href="/culture-threads" className="text-sm font-medium text-blue-500 hover:text-blue-400 transition-colors flex items-center gap-1.5 w-fit mt-auto group/link">

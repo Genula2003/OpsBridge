@@ -29,8 +29,12 @@ export default function LoginPage() {
         await signInWithEmailAndPassword(auth, email, password);
       }
       router.push("/dashboard");
-    } catch (err: any) {
-      setError(err.message || "Failed to authenticate.");
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("Failed to authenticate.");
+      }
     }
   };
 

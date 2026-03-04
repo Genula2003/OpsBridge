@@ -24,8 +24,8 @@ export const seedDatabase = async () => {
           isRemote: true,
           createdAt: Timestamp.now()
         });
-      } catch (err: any) {
-        if (err.code === "auth/email-already-in-use") {
+      } catch (err: unknown) {
+        if (err instanceof Error && 'code' in err && (err as { code: string }).code === "auth/email-already-in-use") {
           const cred = await signInWithEmailAndPassword(auth, "admin@opsbridge.com", "password123");
           uid = cred.user.uid;
         } else {

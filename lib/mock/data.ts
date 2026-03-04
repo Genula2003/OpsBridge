@@ -16,15 +16,15 @@ export const scripts: Script[] = [
 ];
 
 export const stories: Story[] = [
-  { id: "st1", title: "Saved a high-value account", content: "A customer was about to cancel their enterprise plan, but after walking them through our new feature set, they decided to upgrade instead!", authorId: "u3", createdAt: "2023-10-12T16:20:00Z", category: "Win", likes: 24, comments: 5, isPinned: true },
-  { id: "st2", title: "Funny typo in chat", content: "I accidentally typed 'have a great die' instead of 'day' and the customer replied 'RIP'. We had a good laugh.", authorId: "u4", createdAt: "2023-10-14T09:10:00Z", category: "Humor", likes: 56, comments: 12, isPinned: false },
-  { id: "st3", title: "Tricky technical issue resolved", content: "Spent 2 hours diagnosing a weird caching issue. Turns out clearing their browser data did the trick. Always check the basics first.", authorId: "u5", createdAt: "2023-10-15T11:05:00Z", category: "Learning", likes: 18, comments: 2, isPinned: false },
+  { id: "st1", title: "Saved a high-value account", story: "A customer was about to cancel their enterprise plan, but after walking them through our new feature set, they decided to upgrade instead!", authorUid: "u3", authorName: "Charlie Davis", createdAt: Date.parse("2023-10-12T16:20:00Z"), tags: ["Win"], upvoteCount: 24 },
+  { id: "st2", title: "Funny typo in chat", story: "I accidentally typed 'have a great die' instead of 'day' and the customer replied 'RIP'. We had a good laugh.", authorUid: "u4", authorName: "Diana Prince", createdAt: Date.parse("2023-10-14T09:10:00Z"), tags: ["Humor"], upvoteCount: 56 },
+  { id: "st3", title: "Tricky technical issue resolved", story: "Spent 2 hours diagnosing a weird caching issue. Turns out clearing their browser data did the trick. Always check the basics first.", authorUid: "u5", authorName: "Evan Wright", createdAt: Date.parse("2023-10-15T11:05:00Z"), tags: ["Learning"], upvoteCount: 18 },
 ];
 
 export const threads: Thread[] = [
-  { id: "th1", title: "How to handle angry customers during an outage?", content: "Looking for tips on de-escalation when our services go down.", authorId: "u4", createdAt: "2023-10-10T08:00:00Z", replies: 15, views: 120, isLocked: false, isResolved: true, tags: ["outage", "de-escalation"] },
-  { id: "th2", title: "Feedback on the new CRM interface", content: "The new layout is a bit confusing. Anyone else finding it hard to locate customer history?", authorId: "u5", createdAt: "2023-10-16T13:30:00Z", replies: 8, views: 85, isLocked: false, isResolved: false, tags: ["feedback", "crm"] },
-  { id: "th3", title: "Upcoming policy changes Q&A", content: "Post your questions about next month's return policy changes here.", authorId: "u1", createdAt: "2023-10-17T09:00:00Z", replies: 22, views: 250, isLocked: true, isResolved: false, tags: ["policy", "announcement"] },
+  { id: "th1", title: "How to handle angry customers during an outage?", body: "Looking for tips on de-escalation when our services go down.", authorUid: "u4", authorName: "Diana Prince", createdAt: Date.parse("2023-10-10T08:00:00Z"), upvoteCount: 15, category: "question" },
+  { id: "th2", title: "Feedback on the new CRM interface", body: "The new layout is a bit confusing. Anyone else finding it hard to locate customer history?", authorUid: "u5", authorName: "Evan Wright", createdAt: Date.parse("2023-10-16T13:30:00Z"), upvoteCount: 8, category: "discussion" },
+  { id: "th3", title: "Upcoming policy changes Q&A", body: "Post your questions about next month's return policy changes here.", authorUid: "u1", authorName: "Alice Johnson", createdAt: Date.parse("2023-10-17T09:00:00Z"), upvoteCount: 22, category: "announcement" },
 ];
 
 export const events: Event[] = [

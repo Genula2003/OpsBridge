@@ -67,37 +67,50 @@ service cloud.firestore {
       allow update, delete: if false; // No vote changing/deleting for MVP? Let's keep it simple.
     }
 
-    // --- 4. stories ---
-    match /stories/{storyId} {
+    // --- 4. shiftStories ---
+    match /shiftStories/{storyId} {
       allow read: if isAuthenticated();
       allow create: if isAuthenticated()
-                    && request.resource.data.authorId == request.auth.uid
-                    && (!request.resource.data.keys().hasAny(['pinned']) || request.resource.data.pinned == false);
-      allow update: if (isAuthenticated() && request.auth.uid == resource.data.authorId
-                        && request.resource.data.pinned == resource.data.pinned)
-                    || (isTL() || isAdmin());
-      allow delete: if isAuthenticated() && request.auth.uid == resource.data.authorId;
+                    && request.resource.data.authorUid == request.auth.uid;
+      allow update: if isAuthenticated(); // To allow upvotes. In real app, separate votes to subcollection or check fields
+      allow delete: if isAuthenticated() && request.auth.uid == resource.data.authorUid;
+
+      match /comments/{commentId} {
+        allow read: if isAuthenticated();
+        allow create: if isAuthenticated() && request.resource.data.uid == request.auth.uid;
+        allow update, delete: if isAuthenticated() && request.auth.uid == resource.data.uid;
+      }
+    }
+
+    match /shiftStoryVotes/{voteId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated()
+                    && request.resource.data.uid == request.auth.uid
+                    && voteId == request.resource.data.storyId + '_' + request.auth.uid;
+      allow delete: if isAuthenticated();
     }
 
     // --- 5. threads ---
     match /threads/{threadId} {
       allow read: if isAuthenticated();
       allow create: if isAuthenticated()
-                    && request.resource.data.authorId == request.auth.uid
-                    && (!request.resource.data.keys().hasAny(['locked']) || request.resource.data.locked == false);
-      allow update: if (isAuthenticated() && request.auth.uid == resource.data.authorId
-                        && request.resource.data.locked == resource.data.locked)
-                    || (isTL() || isAdmin());
-      allow delete: if isAuthenticated() && request.auth.uid == resource.data.authorId;
+                    && request.resource.data.authorUid == request.auth.uid;
+      allow update: if isAuthenticated(); // Allow upvotes
+      allow delete: if isAuthenticated() && request.auth.uid == resource.data.authorUid;
+
+      match /comments/{commentId} {
+        allow read: if isAuthenticated();
+        allow create: if isAuthenticated() && request.resource.data.uid == request.auth.uid;
+        allow update, delete: if isAuthenticated() && request.auth.uid == resource.data.uid;
+      }
     }
 
-    // --- 6. threadComments ---
-    match /threadComments/{commentId} {
+    match /threadVotes/{voteId} {
       allow read: if isAuthenticated();
       allow create: if isAuthenticated()
-                    && request.resource.data.authorId == request.auth.uid
-                    && get(/databases/$(database)/documents/threads/$(request.resource.data.threadId)).data.locked == false;
-      allow update, delete: if isAuthenticated() && request.auth.uid == resource.data.authorId;
+                    && request.resource.data.uid == request.auth.uid
+                    && voteId == request.resource.data.threadId + '_' + request.auth.uid;
+      allow delete: if isAuthenticated();
     }
 
     // --- 7. events ---

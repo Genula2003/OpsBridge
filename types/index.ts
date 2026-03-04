@@ -40,26 +40,23 @@ export interface Comment {
 export interface Story {
   id: string;
   title: string;
-  content: string;
-  authorId: string;
-  createdAt: string;
-  category: string;
-  likes: number;
-  comments: number;
-  isPinned: boolean;
+  story: string;
+  tags: string[];
+  authorUid: string;
+  authorName: string;
+  createdAt: number;
+  upvoteCount: number;
 }
 
 export interface Thread {
   id: string;
   title: string;
-  content: string;
-  authorId: string;
-  createdAt: string;
-  replies: number;
-  views: number;
-  isLocked: boolean;
-  isResolved: boolean;
-  tags: string[];
+  body: string;
+  category: string;
+  authorUid: string;
+  authorName: string;
+  createdAt: number;
+  upvoteCount: number;
 }
 
 export interface Event {

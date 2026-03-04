@@ -46,7 +46,7 @@ export default function Sidebar() {
     ? [...routes, { name: "Admin", path: "/admin", icon: ShieldAlert }]
     : routes;
 
-  const NavContent = () => (
+  const navContent = (
     <div className="flex flex-col h-full bg-[#0B0B10] border-r border-white/5 py-6">
       <div className="flex items-center justify-between px-6 mb-10">
         {!collapsed && (
@@ -123,7 +123,7 @@ export default function Sidebar() {
         transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
         className="hidden md:block h-screen z-40 relative shadow-[20px_0_40px_-20px_rgba(0,0,0,0.5)]"
       >
-        <NavContent />
+        {navContent}
       </motion.aside>
 
       {/* Mobile Sidebar */}
@@ -141,7 +141,7 @@ export default function Sidebar() {
           className="w-64 h-full"
           onClick={(e) => e.stopPropagation()}
         >
-          <NavContent />
+          {navContent}
         </motion.aside>
       </div>
     </>
